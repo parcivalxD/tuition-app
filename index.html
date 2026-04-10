@@ -1,98 +1,138 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Tuition Tracker</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body { font-family: Arial; padding: 20px; background: #f7f7f7; }
-    .card { background: white; padding: 15px; margin-bottom: 15px; border-radius: 8px; box-shadow: 0 0 5px #ccc; }
-    input { padding: 8px; margin: 5px 0; width: 100%; border-radius: 5px; border: 1px solid #ccc; }
-    button { padding: 10px; margin-top: 5px; width: 100%; background: #2196f3; color: white; border: none; border-radius: 5px; }
-    button:hover { background: #1976d2; }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tuition Tracker</title>
+
+    <!-- Link to Manifest -->
+    <link rel="manifest" href="manifest.json">
+
+    <!-- Simple styling -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f2f2f2;
+        }
+        h2 {
+            margin-top: 0;
+        }
+        .card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        input, button, select {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 5px;
+            border: 1px solid #aaa;
+        }
+        button {
+            background: black;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+        .student {
+            margin: 12px 0;
+            padding: 10px;
+            border-left: 4px solid black;
+            background: #fff;
+            border-radius: 4px;
+        }
+    </style>
+
+    <script>
+        function saveStudent() {
+            let name = document.getElementById("name").value;
+            let phone = document.getElementById("phone").value;
+            let rate = document.getElementById("rate").value;
+            let classes = document.getElementById("classes").value;
+
+            if (!name || !phone) {
+                alert("Name & phone required");
+                return;
+            }
+
+            let students = JSON.parse(localStorage.getItem("students") || "[]");
+
+            students.push({
+                name,
+                phone,
+                rate,
+                totalClasses: parseInt(classes),
+                attended: 0
+            });
+
+            localStorage.setItem("students", JSON.stringify(students));
+            loadStudents();
+
+            document.getElementById("name").value = "";
+            document.getElementById("phone").value = "";
+        }
+
+        function markClass(index) {
+            let students = JSON.parse(localStorage.getItem("students"));
+            students[index].attended++;
+            localStorage.setItem("students", JSON.stringify(students));
+            loadStudents();
+        }
+
+        function loadStudents() {
+            let box = document.getElementById("students");
+            box.innerHTML = "";
+
+            let students = JSON.parse(localStorage.getItem("students") || "[]");
+
+            students.forEach((s, i) => {
+                box.innerHTML += `
+                    <div class="student">
+                        <b>${s.name}</b> (${s.phone})<br>
+                        Rate: ${s.rate} BDT<br>
+                        Classes: ${s.attended}/${s.totalClasses}<br>
+                        <button onclick="markClass(${i})">Mark Class Done</button>
+                    </div>
+                `;
+            });
+        }
+
+        window.onload = loadStudents;
+    </script>
 </head>
+
 <body>
 
-<h2>Tuition Tracker</h2>
+    <div class="card">
+        <h2>Add Student</h2>
+        <input id="name" placeholder="Student name">
+        <input id="phone" placeholder="Phone number" type="number">
 
-<div class="card">
-  <h3>Add Student</h3>
-  <input id="name" placeholder="Name">
-  <input id="phone" placeholder="Phone">
-  <input id="classes" type="number" placeholder="Total Classes (e.g. 16)">
-  <input id="fee" type="number" placeholder="Total Fee (e.g. 5000)">
-  <button onclick="addStudent()">Add Student</button>
-</div>
+        <select id="rate">
+            <option value="5000">5000 BDT (16 classes)</option>
+            <option value="3500">3500 BDT (12 classes)</option>
+        </select>
 
-<div id="students"></div>
+        <select id="classes">
+            <option value="16">16</option>
+            <option value="12">12</option>
+        </select>
 
-<script>
-let students = JSON.parse(localStorage.getItem("students")) || [];
+        <button onclick="saveStudent()">Add</button>
+    </div>
 
-function save() {
-  localStorage.setItem("students", JSON.stringify(students));
-}
-
-function addStudent() {
-  const name = document.getElementById("name").value;
-  const phone = document.getElementById("phone").value;
-  const classCount = parseInt(document.getElementById("classes").value);
-  const fee = parseFloat(document.getElementById("fee").value);
-
-  if (!name || !phone || !classCount || !fee) {
-    alert("Fill all fields correctly.");
-    return;
-  }
-
-  students.push({
-    id: Date.now(),
-    name,
-    phone,
-    classCount,
-    fee,
-    sessions: []
-  });
-
-  save();
-  render();
-}
-
-function addSession(id) {
-  const s = students.find(a => a.id === id);
-  const date = new Date().toISOString().split("T")[0];
-  s.sessions.push(date);
-  save();
-  render();
-}
-
-function render() {
-  const area = document.getElementById("students");
-  area.innerHTML = "";
-
-  students.forEach(s => {
-    const done = s.sessions.length;
-    const remaining = s.classCount - done;
-    const perClass = s.fee / s.classCount;
-    const earned = perClass * done;
-
-    area.innerHTML += `
-      <div class="card">
-        <h3>${s.name}</h3>
-        <p>Phone: ${s.phone}</p>
-        <p>Completed: ${done}/${s.classCount}</p>
-        <p>Remaining: ${remaining}</p>
-        <p>Earned: ${earned.toFixed(2)} BDT</p>
-        <button onclick="addSession(${s.id})">Add Class</button>
-      </div>
-    `;
-  });
-}
-
-render();
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("service-worker.js");
-}
-</script>
+    <div class="card">
+        <h2>Your Students</h2>
+        <div id="students"></div>
+    </div>
 
 </body>
 </html>
