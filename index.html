@@ -95,8 +95,10 @@
                 box.innerHTML += `
                     <div class="student">
                         <b>${s.name}</b> (${s.phone})<br>
-                        Rate: ${s.rate} BDT<br>
+                        Fee: ${s.fee} BDT<br>
                         Classes: ${s.attended}/${s.totalClasses}<br>
+                        Per Class: ${(s.fee / s.totalClasses).toFixed(2)} BDT<br>
+                        Earned: ${(s.attended * (s.fee / s.totalClasses)).toFixed(2)} BDT<br>
                         <button onclick="markClass(${i})">Mark Class Done</button>
                     </div>
                 `;
