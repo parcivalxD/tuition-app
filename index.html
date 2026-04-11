@@ -55,9 +55,9 @@
         function saveStudent() {
             let name = document.getElementById("name").value;
             let phone = document.getElementById("phone").value;
-            let rate = document.getElementById("rate").value;
-            let classes = document.getElementById("classes").value;
-
+            let fee = parseFloat(document.getElementById("fee").value);
+            let classes = parseInt(document.getElementById("classes").value);
+            
             if (!name || !phone) {
                 alert("Name & phone required");
                 return;
@@ -66,13 +66,11 @@
             let students = JSON.parse(localStorage.getItem("students") || "[]");
 
             students.push({
-                name,
-                phone,
-                rate,
-                totalClasses: parseInt(classes),
-                attended: 0
-            });
-
+            name,
+            phone,
+            fee,
+            totalClasses: classes, attended: 0
+             });
             localStorage.setItem("students", JSON.stringify(students));
             loadStudents();
 
