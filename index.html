@@ -69,7 +69,7 @@
             name,
             phone,
             fee,
-            totalClasses: classes, attended: 0
+            totalClasses: classes, sessions: []
              });
             localStorage.setItem("students", JSON.stringify(students));
             loadStudents();
@@ -79,12 +79,15 @@
         }
 
         function markClass(index) {
-            let students = JSON.parse(localStorage.getItem("students"));
-            students[index].attended++;
-            localStorage.setItem("students", JSON.stringify(students));
-            loadStudents();
-        }
+    let students = JSON.parse(localStorage.getItem("students"));
 
+    let today = new Date().toISOString().split("T")[0];
+
+    students[index].sessions.push(today);
+
+    localStorage.setItem("students", JSON.stringify(students));
+    loadStudents();
+}
         function loadStudents() {
             let box = document.getElementById("students");
             box.innerHTML = "";
@@ -96,7 +99,7 @@
                     <div class="student">
                         <b>${s.name}</b> (${s.phone})<br>
                         Fee: ${s.fee} BDT<br>
-                        Classes: ${s.attended}/${s.totalClasses}<br>
+                        Classes: ${s.sessions.length}/${s.totalClasses}<br>
                         Per Class: ${(s.fee / s.totalClasses).toFixed(2)} BDT<br>
                         Earned: ${(s.attended * (s.fee / s.totalClasses)).toFixed(2)} BDT<br>
                         <button onclick="markClass(${i})">Mark Class Done</button>
